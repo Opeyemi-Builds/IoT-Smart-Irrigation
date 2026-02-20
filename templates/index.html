@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lumina Terra-Pulse | Engineering Command</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        letter-spacing: -0.02em;
+      }
+      .no-split {
+        white-space: nowrap;
+      }
+
+      .tank-container {
+        width: 70px;
+        height: 110px;
+        border: 3px solid #334155;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        background: #0f172a;
+      }
+      .water {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+      }
+      .wave {
+        position: absolute;
+        top: -10px;
+        left: 0;
+        width: 200%;
+        height: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 40%;
+        animation: waveMove 4s infinite linear;
+      }
+      @keyframes waveMove {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      .btn-hover:hover {
+        background-color: #2563eb !important;
+        box-shadow: 0 0 25px rgba(37, 99, 235, 0.4);
+        transform: translateY(-1px);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-[#0b0f1a] text-slate-200 antialiased min-h-screen flex flex-col"
+  >
+    <nav
+      class="border-b border-slate-800 bg-[#111827]/90 backdrop-blur-xl sticky top-0 z-50"
+    >
+      <div
+        class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white text-xl"
+          >
+            L
+          </div>
+          <div>
+            <h1 class="text-xl font-black text-white no-split uppercase">
+              TERRA-PULSE
+            </h1>
+            <p
+              class="text-[10px] font-bold text-blue-500 tracking-[0.2em] uppercase"
+            >
+              Autonomous Irrigation
+            </p>
+          </div>
+        </div>
+
+        <div
+          id="weather-ticket"
+          class="hidden md:flex items-center gap-4 bg-slate-800/50 px-5 py-2 rounded-xl border border-slate-700"
+        >
+          <div class="text-right">
+            <p class="text-[9px] font-black text-slate-500 uppercase">
+              Akure Conditions
+            </p>
+            <p id="nav-temp" class="text-xs font-black text-white">--°C</p>
+          </div>
+          <div id="nav-icon" class="text-xl">☀️</div>
+        </div>
+
+        <button
+          onclick="downloadFullReport()"
+          class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black px-6 py-3 rounded-lg transition-all uppercase tracking-widest shadow-lg"
+        >
+          Generate Report
+        </button>
+      </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full p-4 md:p-8 space-y-6">
+      <div class="bg-slate-900/40 p-6 rounded-3xl border border-slate-800">
+        <h2
+          class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-1"
+        >
+          Systems Engineering
+        </h2>
+        <div
+          class="flex items-center gap-4 text-white font-black text-xl md:text-2xl uppercase tracking-tight"
+        >
+          <span class="font-black">ALEGBELEYE OPEYEMI</span>
+          <span class="text-slate-800">/</span>
+          <span class="font-black">OYEBISI HAKEEM</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-4 space-y-6">
+          <div
+            class="bg-gradient-to-br from-blue-900/20 to-slate-900 p-8 rounded-[2rem] border border-blue-500/20 shadow-xl"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <h3
+                class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+              >
+                Environment Intel
+              </h3>
+              <span
+                class="text-[9px] font-black text-slate-500 bg-slate-800 px-2 py-1 rounded italic uppercase font-black"
+                >Akure, NG</span
+              >
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <p
+                  id="weather-desc"
+                  class="text-2xl font-black text-white uppercase"
+                >
+                  Syncing...
+                </p>
+                <p
+                  id="weather-humidity"
+                  class="text-[10px] font-black text-blue-300 uppercase mt-1 tracking-wider"
+                >
+                  Air Humidity: --%
+                </p>
+              </div>
+              <div id="main-weather-icon" class="text-5xl">☀️</div>
+            </div>
+          </div>
+
+          <div
+            class="bg-[#111827] p-8 rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between"
+          >
+            <div class="tank-container">
+              <div id="water-level" class="water" style="height: 0%">
+                <div class="wave"></div>
+              </div>
+            </div>
+            <div class="text-right">
+              <p
+                class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1"
+              >
+                Reservoir
+              </p>
+              <p
+                id="val-water"
+                class="text-5xl font-black text-cyan-400 tracking-tighter"
+              >
+                --%
+              </p>
+              <div
+                id="tank-badge"
+                class="mt-3 inline-block px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[9px] font-black text-slate-400 uppercase"
+              >
+                Scanning
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-[#111827] p-8 rounded-[2rem] border border-slate-800 shadow-xl"
+          >
+            <h3
+              class="text-[11px] font-black text-white uppercase tracking-widest mb-6"
+            >
+              SYSTEM COMMAND
+            </h3>
+            <div class="space-y-4">
+              <div
+                class="flex justify-between items-center p-4 bg-slate-900 rounded-xl border border-slate-800"
+              >
+                <div>
+                  <p
+                    class="text-[9px] font-black text-white uppercase mb-1 tracking-widest"
+                  >
+                    PUMP STATE
+                  </p>
+                  <div class="flex items-center gap-2">
+                    <div
+                      id="pump-dot"
+                      class="h-3 w-3 rounded-full bg-slate-700"
+                    ></div>
+                    <span
+                      id="pump-text"
+                      class="text-sm font-black uppercase text-white"
+                      >Standby</span
+                    >
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p
+                    class="text-[9px] font-black text-white uppercase mb-1 tracking-widest"
+                  >
+                    AI LOGIC
+                  </p>
+                  <p
+                    id="decision-text"
+                    class="text-sm font-black text-blue-500 uppercase"
+                  >
+                    Ready
+                  </p>
+                </div>
+              </div>
+              <button
+                id="override-btn"
+                onclick="toggleOverride()"
+                class="btn-hover w-full bg-white text-slate-900 font-black py-4 rounded-xl transition-all uppercase text-[10px] tracking-widest"
+              >
+                Manual Override
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4">
+            <div
+              class="bg-[#111827] p-5 rounded-2xl border border-slate-800 text-center"
+            >
+              <p class="text-[9px] font-black text-slate-400 uppercase mb-1">
+                Soil
+              </p>
+              <p class="text-xl font-black text-blue-500" id="val-moisture">
+                --
+              </p>
+            </div>
+            <div
+              class="bg-[#111827] p-5 rounded-2xl border border-slate-800 text-center"
+            >
+              <p class="text-[9px] font-black text-slate-400 uppercase mb-1">
+                Temp
+              </p>
+              <p class="text-xl font-black text-orange-400" id="val-temp">--</p>
+            </div>
+            <div
+              class="bg-[#111827] p-5 rounded-2xl border border-slate-800 text-center"
+            >
+              <p class="text-[9px] font-black text-slate-400 uppercase mb-1">
+                Hum
+              </p>
+              <p class="text-xl font-black text-purple-400" id="val-hum">--</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-6">
+          <div
+            class="bg-[#111827] p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl"
+          >
+            <h2
+              class="text-xs font-black text-slate-400 uppercase tracking-widest mb-8"
+            >
+              Field Moisture Analysis
+            </h2>
+            <div class="h-[340px]"><canvas id="moistureChart"></canvas></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+              class="bg-[#111827] p-6 rounded-[2rem] border border-slate-800"
+            >
+              <h3
+                class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 text-center"
+              >
+                Temperature Stream
+              </h3>
+              <div class="h-[140px]"><canvas id="tempChart"></canvas></div>
+            </div>
+            <div
+              class="bg-[#111827] p-6 rounded-[2rem] border border-slate-800"
+            >
+              <h3
+                class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 text-center"
+              >
+                Humidity Variance
+              </h3>
+              <div class="h-[140px]"><canvas id="humChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      class="mt-12 border-t border-slate-800 bg-[#0b0f1a] py-10 text-center"
+    >
+      <p
+        class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]"
+      >
+        © 2026 Lumina Terra-Pulse | Engineering Hub
+      </p>
+    </footer>
+
+    <script>
+      let charts = {};
+      let manualOverrideActive = false;
+
+      async function fetchRealWeather() {
+        try {
+          const res = await fetch(`https://wttr.in/Akure?format=j1`);
+          const data = await res.json();
+          const current = data.current_condition[0];
+          document.getElementById("nav-temp").innerText = current.temp_C + "°C";
+          document.getElementById("weather-desc").innerText =
+            current.weatherDesc[0].value;
+          document.getElementById("weather-humidity").innerText =
+            "Air Humidity: " + current.humidity + "%";
+          const desc = current.weatherDesc[0].value;
+          const icons = {
+            Clear: "☀️",
+            Sunny: "☀️",
+            "Partly cloudy": "⛅",
+            Cloudy: "☁️",
+            Overcast: "☁️",
+            Rain: "🌧️",
+            "Light rain": "🌧️",
+          };
+          document.getElementById("nav-icon").innerText = icons[desc] || "⛅";
+          document.getElementById("main-weather-icon").innerText =
+            icons[desc] || "⛅";
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      function initChart(id, label, color, bgColor) {
+        const ctx = document.getElementById(id).getContext("2d");
+        return new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: label,
+                data: [],
+                borderColor: color,
+                backgroundColor: bgColor,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 2,
+                borderWidth: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: "rgba(255,255,255,0.03)" },
+                ticks: { color: "#475569", font: { size: 9, weight: "900" } },
+              },
+              x: { display: false },
+            },
+          },
+        });
+      }
+
+      function toggleOverride() {
+        manualOverrideActive = !manualOverrideActive;
+        const btn = document.getElementById("override-btn");
+        if (manualOverrideActive) {
+          btn.className =
+            "btn-hover w-full bg-blue-600 text-white font-black py-4 rounded-xl transition-all uppercase text-[10px] tracking-widest shadow-blue-500/50";
+          btn.innerText = "Manual Mode Active";
+        } else {
+          btn.className =
+            "btn-hover w-full bg-white text-slate-900 font-black py-4 rounded-xl transition-all uppercase text-[10px] tracking-widest";
+          btn.innerText = "Manual Override";
+        }
+      }
+
+      async function updateDashboard() {
+        try {
+          const resL = await fetch("/api/latest");
+          const latest = await resL.json();
+          if (latest) {
+            document.getElementById("val-moisture").innerText =
+              latest.moisture + "%";
+            document.getElementById("val-temp").innerText = latest.temperature
+              ? latest.temperature.toFixed(0) + "°"
+              : "0°";
+            document.getElementById("val-hum").innerText = latest.humidity
+              ? latest.humidity.toFixed(0) + "%"
+              : "0%";
+            document.getElementById("decision-text").innerText =
+              latest.decision;
+            document.getElementById("val-water").innerText =
+              (latest.water_level || 0).toFixed(0) + "%";
+            document.getElementById("water-level").style.height =
+              (latest.water_level || 0) + "%";
+
+            const dot = document.getElementById("pump-dot");
+            const txt = document.getElementById("pump-text");
+            dot.className = latest.pump_status
+              ? "h-3 w-3 rounded-full bg-emerald-500 shadow-emerald-500/50 shadow-lg"
+              : "h-3 w-3 rounded-full bg-slate-700";
+            txt.innerText = latest.pump_status ? "Irrigating" : "Standby";
+          }
+          const resH = await fetch("/api/history");
+          const historyData = await resH.json();
+          const sorted = [...historyData].reverse();
+          const labels = sorted.map((d) =>
+            new Date(d.timestamp).toLocaleTimeString(),
+          );
+          charts.moisture.data.labels = labels;
+          charts.moisture.data.datasets[0].data = sorted.map((d) => d.moisture);
+          charts.moisture.update("none");
+          charts.temp.data.labels = labels;
+          charts.temp.data.datasets[0].data = sorted.map(
+            (d) => d.temperature || 0,
+          );
+          charts.temp.update("none");
+          charts.hum.data.labels = labels;
+          charts.hum.data.datasets[0].data = sorted.map((d) => d.humidity || 0);
+          charts.hum.update("none");
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      async function downloadFullReport() {
+        const res = await fetch("/api/history");
+        const data = await res.json();
+        let csv =
+          "data:text/csv;charset=utf-8,Timestamp,Moisture(%),Temp(C),Hum(%),Water(%),Pump,Decision\n";
+        data.forEach(
+          (r) =>
+            (csv += `${r.timestamp},${r.moisture},${r.temperature},${r.humidity},${r.water_level},${r.pump_status},${r.decision}\n`),
+        );
+        window.open(encodeURI(csv));
+      }
+
+      window.onload = () => {
+        charts.moisture = initChart(
+          "moistureChart",
+          "Moisture",
+          "#3b82f6",
+          "rgba(59, 130, 246, 0.05)",
+        );
+        charts.temp = initChart(
+          "tempChart",
+          "Temp",
+          "#f97316",
+          "rgba(249, 115, 22, 0.05)",
+        );
+        charts.hum = initChart(
+          "humChart",
+          "Hum",
+          "#a855f7",
+          "rgba(168, 85, 247, 0.05)",
+        );
+        fetchRealWeather();
+        updateDashboard();
+        setInterval(updateDashboard, 5000);
+        setInterval(fetchRealWeather, 600000);
+      };
+    </script>
+  </body>
+</html>
